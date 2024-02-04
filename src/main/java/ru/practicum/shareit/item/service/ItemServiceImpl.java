@@ -37,7 +37,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto updateItem(ItemDto itemDto, Integer ownerId, Integer itemId) {
         log.info("Обновление вещи: {} пользователя id:{}", itemDto, ownerId);
-        if (ownerId <= 0 || itemId <=0) {
+        if (ownerId <= 0 || itemId <= 0) {
             throw new ValidationException("Id должен быть положительным");
         }
         if ("".equals(itemDto.getName()) || "".equals(itemDto.getDescription())) {
@@ -50,7 +50,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto getItemById(Integer itemId) {
         log.info("Получение вещи по id:{}", itemId);
-        if (itemId <=0) {
+        if (itemId <= 0) {
             throw new ValidationException("Id должен быть положительным");
         }
         Item resultItem = itemStorage.getItemById(itemId);
@@ -60,7 +60,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemDto> getItemsByOwner(Integer ownerId) {
         log.info("Отправление списка вещей владельца id:{}", ownerId);
-        if (ownerId <=0) {
+        if (ownerId <= 0) {
             throw new ValidationException("Id должен быть положительным");
         }
         List<Item> ownerItems = itemStorage.getItemsByOwner(ownerId);
