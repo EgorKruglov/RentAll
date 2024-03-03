@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.exceptions.extraExceptions.ValidationException;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.service.ItemServiceImpl;
@@ -68,9 +69,10 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItem(@PathVariable Integer itemId) {
-        ItemDto item = itemService.getItemById(itemId);
-        log.info("Отправлена информация о вещи id:" + itemId);
+    public ItemDto getItem(@RequestHeader("X-Sharer-User-Id") Integer userId,
+                           @PathVariable Integer itemId) {
+        ItemDto item = itemService.getItemById(itemId, userId);
+        log.info("Отправлена информация о вещи id:{} пользователю id:{}", itemId, userId);
         return item;
     }
 
@@ -82,9 +84,26 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public List<ItemDto> getItemsBySearch(@RequestParam String text) {
-        List<ItemDto> searchingItems = itemService.getItemsBySearch(text);
+    public List<ItemDto> getItemsBySearch(@RequestHeader("X-Sharer-User-Id") Integer userId,
+                                          @RequestParam String text) {
+        List<ItemDto> searchingItems = itemService.getItemsBySearch(userId, text);
         log.info("Отправлен список вещей по поисковому запросу: '{}'", text);
         return searchingItems;
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto addComment(@RequestHeader("X-Sharer-User-Id") Integer userId,
+                                    @Valid @RequestBody CommentDto commentDto,
+                                    @PathVariable Integer itemId,
+                                    BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            StringBuilder errors = new StringBuilder();
+            bindingResult.getFieldErrors().forEach(error ->
+                    errors.append(error.getDefaultMessage()).append("\n")
+            );
+            throw new ValidationException("Ошибка валидации отзыва: " + errors);
+        }
+        log.info("Добавлен комментарий пользователем id:" + userId);
+        return itemService.createComment(userId, commentDto, itemId);
     }
 }
