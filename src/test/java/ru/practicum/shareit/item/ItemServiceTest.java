@@ -95,7 +95,6 @@ public class ItemServiceTest {
             .available(true)
             .comments(Collections.emptyList())
             .build();
-    
     private final ItemDto itemDtoUpdate = ItemDto.builder()
             .build();
 
