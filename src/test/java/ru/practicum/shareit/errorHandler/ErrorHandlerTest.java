@@ -1,8 +1,6 @@
 package ru.practicum.shareit.errorHandler;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import ru.practicum.shareit.exceptions.ErrorHandler;
 import ru.practicum.shareit.exceptions.ErrorResponse;
 import ru.practicum.shareit.exceptions.extraExceptions.BookingNotFoundException;
