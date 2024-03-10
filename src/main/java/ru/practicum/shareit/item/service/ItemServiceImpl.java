@@ -1,6 +1,8 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDtoOut;
@@ -17,6 +19,7 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.CommentRepository;
 import ru.practicum.shareit.item.storage.ItemRepository;
+import ru.practicum.shareit.request.storage.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserRepository;
 
@@ -33,15 +36,18 @@ import static java.util.stream.Collectors.toList;
 @Service
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
+    private final ItemRequestRepository itemRequestRepository;
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
 
     public ItemServiceImpl(ItemRepository itemRepository,
+                           ItemRequestRepository itemRequestRepository,
                            UserRepository userRepository,
                            BookingRepository bookingRepository,
                            CommentRepository commentRepository) {
         this.itemRepository = itemRepository;
+        this.itemRequestRepository = itemRequestRepository;
         this.userRepository = userRepository;
         this.bookingRepository = bookingRepository;
         this.commentRepository = commentRepository;
@@ -65,6 +71,9 @@ public class ItemServiceImpl implements ItemService {
         );
         Item item = ItemDtoMapper.dtoToItem(itemDto);
         item.setOwner(user);
+        if (itemDto.getRequestId() != null) {
+            item.setRequest(itemRequestRepository.getReferenceById(itemDto.getRequestId()));
+        }
         Item resultItem = itemRepository.save(item);
         return ItemDtoMapper.itemToDto(resultItem);
     }
@@ -144,7 +153,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemDto> getItemsByOwner(Integer ownerId) {
+    public List<ItemDto> getItemsByOwner(Integer ownerId, Integer from, Integer size) {
         log.info("Отправление списка вещей владельца id:{}", ownerId);
         if (ownerId <= 0) {
             throw new ValidationException("Id должен быть положительным");
@@ -154,7 +163,8 @@ public class ItemServiceImpl implements ItemService {
                             return new UserNotFoundException("Пользователь не найден");
                         }
                 );
-        List<Item> itemList = itemRepository.findAllByOwnerId(ownerId);
+        Pageable pageable = PageRequest.of(from / size, size);
+        List<Item> itemList = itemRepository.findAllByOwnerId(ownerId, pageable);
         List<Integer> idList = itemList.stream()
                 .map(Item::getId)
                 .collect(Collectors.toList());
@@ -182,7 +192,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemDto> getItemsBySearch(Integer userId, String text) {
+    public List<ItemDto> getItemsBySearch(Integer userId, String text, Integer from, Integer size) {
         log.info("Отправление списка вещей по поисковому запросу: '{}'", text);
         if (text.isBlank()) {
             return List.of();
@@ -192,7 +202,8 @@ public class ItemServiceImpl implements ItemService {
                             return new UserNotFoundException("Пользователь не найден");
                         }
                 );
-        List<Item> itemList = itemRepository.search(text);
+        Pageable pageable = PageRequest.of(from / size, size);
+        List<Item> itemList = itemRepository.search(text, pageable);
         return itemList.stream()
                 .map(ItemDtoMapper::itemToDto)
                 .collect(toList());
