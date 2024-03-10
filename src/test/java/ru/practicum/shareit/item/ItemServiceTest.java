@@ -9,7 +9,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import ru.practicum.shareit.booking.dto.BookingDtoOut;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.storage.BookingRepository;
@@ -35,6 +37,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -230,6 +233,21 @@ public class ItemServiceTest {
     }
 
     @Test
+    void getItemsBySearch_WhenValidInput_ShouldReturnItemList() {
+        Integer userId = 1;
+        String text = "some text";
+        Integer from = 0;
+        Integer size = 10;
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(new User()));
+        Pageable pageable = PageRequest.of(from / size, size);
+        when(itemRepository.search(text, pageable)).thenReturn(Collections.singletonList(new Item()));
+
+        List<ItemDto> result = itemService.getItemsBySearch(userId, text, from, size);
+        assertFalse(result.isEmpty());
+    }
+
+    @Test
     void getAllComments() {
         List<CommentDto> expectedCommentsDto = List.of(CommentDtoMapper.toCommentDto(comment));
         when(commentRepository.findAllByItemId(item.getId())).thenReturn(List.of(comment));
@@ -268,7 +286,7 @@ public class ItemServiceTest {
     }
 
     @Test
-    void createComment_whenItemIdIsNotValid_thenThrowObjectNotFoundException() {
+    void createComment_whenItemIdIsNotValid_thenThrowItemNotFoundException() {
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
         when(itemRepository.findById(item.getId())).thenReturn(Optional.empty());
 
@@ -290,6 +308,43 @@ public class ItemServiceTest {
                 () -> itemService.createComment(user.getId(), CommentDtoMapper.toCommentDto(comment), item.getId()));
 
         assertEquals(validationException.getMessage(), "У пользователя с id   " + user.getId() + " должно быть хотя бы одно бронирование предмета с id " + item.getId());
+    }
 
+    @Test
+    void testGetLastBooking() {
+        // Arrange
+        List<BookingDtoOut> bookings = Collections.singletonList(
+                BookingDtoOut.builder()
+                        .id(1)
+                        .start(LocalDateTime.now().minusHours(1))
+                        .end(LocalDateTime.now())
+                        .build()
+        );
+        LocalDateTime currentTime = LocalDateTime.now();
+
+        // Act
+        BookingDtoOut lastBooking = itemService.getLastBooking(bookings, currentTime);
+
+        // Assert
+        assertEquals(1, lastBooking.getId());
+    }
+
+    @Test
+    void testGetNextBooking() {
+        // Arrange
+        List<BookingDtoOut> bookings = Collections.singletonList(
+                BookingDtoOut.builder()
+                        .id(1)
+                        .start(LocalDateTime.now().plusHours(1))
+                        .end(LocalDateTime.now().plusHours(2))
+                        .build()
+        );
+        LocalDateTime currentTime = LocalDateTime.now();
+
+        // Act
+        BookingDtoOut nextBooking = itemService.getNextBooking(bookings, currentTime);
+
+        // Assert
+        assertEquals(1, nextBooking.getId());
     }
 }

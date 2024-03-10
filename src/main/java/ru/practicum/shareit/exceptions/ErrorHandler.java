@@ -8,9 +8,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.practicum.shareit.exceptions.extraExceptions.BookingNotFoundException;
 import ru.practicum.shareit.exceptions.extraExceptions.ItemNotFoundException;
-import ru.practicum.shareit.exceptions.extraExceptions.ObjectAdditionException;
 import ru.practicum.shareit.exceptions.extraExceptions.RequestNotFoundException;
-import ru.practicum.shareit.exceptions.extraExceptions.StorageException;
 import ru.practicum.shareit.exceptions.extraExceptions.UserNotFoundException;
 import ru.practicum.shareit.exceptions.extraExceptions.ValidationException;
 
@@ -30,20 +28,6 @@ public class ErrorHandler {
     @ExceptionHandler({MethodArgumentNotValidException.class, ValidationException.class, ConstraintViolationException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidationException(final Exception e) {
-        log.debug(e.getMessage());
-        return new ErrorResponse(e.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleStorageException(final StorageException e) {
-        log.debug(e.getMessage());
-        return new ErrorResponse(e.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handleObjectAdditionException(final ObjectAdditionException e) {
         log.debug(e.getMessage());
         return new ErrorResponse(e.getMessage());
     }

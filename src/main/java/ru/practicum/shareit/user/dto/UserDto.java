@@ -18,9 +18,4 @@ public class UserDto {
     private String name;
     @Email(message = "Некорректный email адрес")
     private String email;
-
-    public UserDto(String name, String email) {
-        this.name = name;
-        this.email = email;
-    }
 }

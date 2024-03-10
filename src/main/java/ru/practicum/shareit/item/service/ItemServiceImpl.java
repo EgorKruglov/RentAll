@@ -244,7 +244,7 @@ public class ItemServiceImpl implements ItemService {
                 .collect(toList());
     }
 
-    private BookingDtoOut getLastBooking(List<BookingDtoOut> bookings, LocalDateTime time) {
+    public BookingDtoOut getLastBooking(List<BookingDtoOut> bookings, LocalDateTime time) {
         if (bookings == null || bookings.isEmpty()) {
             return null;
         }
@@ -256,7 +256,7 @@ public class ItemServiceImpl implements ItemService {
                 .orElse(null);
     }
 
-    private BookingDtoOut getNextBooking(List<BookingDtoOut> bookings, LocalDateTime time) {
+    public BookingDtoOut getNextBooking(List<BookingDtoOut> bookings, LocalDateTime time) {
         if (bookings == null || bookings.isEmpty()) {
             return null;
         }
