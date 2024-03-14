@@ -1,7 +1,7 @@
 package ru.practicum.shareit.booking;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,18 +15,14 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoOut;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.booking.service.BookingServiceImpl;
-import ru.practicum.shareit.exceptions.extraExceptions.ValidationException;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import java.util.List;
 
-
-
-/**
- * TODO Sprint add-bookings.
- */
 @RestController
 @Slf4j
+@Validated
 @RequestMapping(path = "/bookings")
 public class BookingController {
     private final BookingService bookingService;
@@ -37,15 +33,7 @@ public class BookingController {
 
     @PostMapping
     public BookingDtoOut create(@RequestHeader("X-Sharer-User-Id") Integer userId,
-                                @Valid @RequestBody BookingDto bookingDto,
-                                BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            StringBuilder errors = new StringBuilder();
-            bindingResult.getFieldErrors().forEach(error ->
-                    errors.append(error.getDefaultMessage()).append("\n")
-            );
-            throw new ValidationException("Ошибка валидации запроса бронирования: " + errors);
-        }
+                                @Valid @RequestBody BookingDto bookingDto) {
         log.info("Пользователь с id:{} создал запрос на бронирование вещи", userId);
         return bookingService.add(userId, bookingDto);
     }
@@ -67,15 +55,19 @@ public class BookingController {
 
     @GetMapping
     public List<BookingDtoOut> findAll(@RequestHeader("X-Sharer-User-Id") Integer userId,
-                                       @RequestParam(value = "state", defaultValue = "ALL") String bookingState) {
+                                       @RequestParam(value = "state", defaultValue = "ALL") String bookingState,
+                                       @RequestParam(value = "from", defaultValue = "0") @Min(0) Integer from,
+                                       @RequestParam(value = "size", defaultValue = "10") @Min(1) Integer size) {
         log.info("Отправлен список всех бронирований со статусом {} пользователю id:{}", bookingState, userId);
-        return bookingService.findAll(userId, bookingState);
+        return bookingService.findAll(userId, bookingState, from, size);
     }
 
     @GetMapping("/owner")
     public List<BookingDtoOut> getAllOwner(@RequestHeader("X-Sharer-User-Id") Integer ownerId,
-                                           @RequestParam(value = "state", defaultValue = "ALL") String bookingState) {
+                                           @RequestParam(value = "state", defaultValue = "ALL") String bookingState,
+                                           @RequestParam(value = "from", defaultValue = "0") @Min(0) Integer from,
+                                           @RequestParam(value = "size", defaultValue = "10") @Min(1) Integer size) {
         log.info("Отправлен список всех бронирований со статусом {} владельцу вещей с id:{}", bookingState, ownerId);
-        return bookingService.findAllOwner(ownerId, bookingState);
+        return bookingService.findAllOwner(ownerId, bookingState, from, size);
     }
 }

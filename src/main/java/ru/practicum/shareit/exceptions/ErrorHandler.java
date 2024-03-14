@@ -2,15 +2,17 @@ package ru.practicum.shareit.exceptions;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.practicum.shareit.exceptions.extraExceptions.BookingNotFoundException;
 import ru.practicum.shareit.exceptions.extraExceptions.ItemNotFoundException;
-import ru.practicum.shareit.exceptions.extraExceptions.ObjectAdditionException;
-import ru.practicum.shareit.exceptions.extraExceptions.StorageException;
+import ru.practicum.shareit.exceptions.extraExceptions.RequestNotFoundException;
 import ru.practicum.shareit.exceptions.extraExceptions.UserNotFoundException;
 import ru.practicum.shareit.exceptions.extraExceptions.ValidationException;
+
+import javax.validation.ConstraintViolationException;
 
 @Slf4j
 @RestControllerAdvice
@@ -23,23 +25,9 @@ public class ErrorHandler {
         return new ErrorResponse(e.getMessage());
     }
 
-    @ExceptionHandler
+    @ExceptionHandler({MethodArgumentNotValidException.class, ValidationException.class, ConstraintViolationException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidationException(final ValidationException e) {
-        log.debug(e.getMessage());
-        return new ErrorResponse(e.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleStorageException(final StorageException e) {
-        log.debug(e.getMessage());
-        return new ErrorResponse(e.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handleObjectAdditionException(final ObjectAdditionException e) {
+    public ErrorResponse handleValidationException(final Exception e) {
         log.debug(e.getMessage());
         return new ErrorResponse(e.getMessage());
     }
@@ -54,6 +42,13 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleBookingNotFoundException(final BookingNotFoundException e) {
+        log.debug(e.getMessage());
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleRequestNotFoundException(final RequestNotFoundException e) {
         log.debug(e.getMessage());
         return new ErrorResponse(e.getMessage());
     }

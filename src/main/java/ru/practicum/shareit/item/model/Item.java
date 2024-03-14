@@ -1,10 +1,12 @@
 package ru.practicum.shareit.item.model;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.Column;
@@ -16,9 +18,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-/**
- * TODO Sprint add-controllers.
- */
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
@@ -43,6 +43,12 @@ public class Item {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private User owner;
+
+    @ManyToOne
+    @JoinColumn(name = "request_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private ItemRequest request;
 
     public Item(String name, String description, Boolean available) {
         this.name = name;
