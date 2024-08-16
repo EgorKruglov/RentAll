@@ -2,8 +2,6 @@
 
 ## О проекте
 
----
-
 Приложение **RentAll** позволяет пользователям размещать вещи для аренды и арендовывать их.
 
 Стек технологий: Java 11, Spring Boot, Spring JPA, Hibernate, PostgreSQL, REST API, Docker, Mockito, JUnit, Lombok
@@ -29,8 +27,6 @@
 
 
 ## Запуск приложения
-
----
 
 - **Gateway**: `http://localhost:8080`
 - **Основной сервис**: `http://localhost:9090`
