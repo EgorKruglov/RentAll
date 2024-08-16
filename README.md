@@ -33,7 +33,7 @@
 
 ### Системные требования:
 - Java 11
-- Maven или Maven проект IntelliJ IDEA
+- Maven или Maven-проект IntelliJ IDEA
 - Docker
 
 
